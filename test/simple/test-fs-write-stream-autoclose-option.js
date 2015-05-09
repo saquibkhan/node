@@ -25,50 +25,49 @@ var fs = require('fs');
 
 
 var file = path.join(common.tmpDir, 'write-autoclose-opt1.txt');
-var stream = fs.createWriteStream(file,{flags: 'w+',autoClose:false});
+var stream = fs.createWriteStream(file,{flags: 'w+',autoClose: false});
 stream.write('Test1');
 stream.end();
-stream.on('finish', function(){
+stream.on('finish', function() {
   process.nextTick(function() {
-    if(stream.hasOwnProperty('closed'))
-      assert(!stream.closed);
+    assert(!stream.closed);
     assert(stream.fd);
-    Next();
+    next();
   });
 });
 
 
-function Next(){
+function next() {
   // This will tell us if the fd is usable again or not
   stream = fs.createWriteStream(null, {fd: stream.fd, start: 0 });
   stream.write('Test2');
   stream.end();
-  stream.on('finish', function(){
+  stream.on('finish', function() {
     assert(stream.closed);
     assert(!stream.fd);
-    process.nextTick(Next2);
+    process.nextTick(next2);
   });
 }
 
-function Next2(){
+function next2() {
   //This will test if after reusing the fd data is written properly
   var readStream = fs.createReadStream(file);
-  readStream.data="";
+  readStream.data='';
   readStream.on('data', function(data) {
     readStream.data += data;
   });
   readStream.on('end', function(err) {
     assert.equal(readStream.data, 'Test2');
-    process.nextTick(Next3);
+    process.nextTick(next3);
   });
 }
 
-function Next3(){
+function next3() {
   //This is to test success scenario where autoClose is true
   var stream = fs.createWriteStream(file,{autoClose:true});
   stream.write('Test3');
   stream.end();
-  stream.on('finish', function(){
+  stream.on('finish', function() {
     process.nextTick(function() {
       if(stream.hasOwnProperty('closed'))
         assert(stream.closed);
