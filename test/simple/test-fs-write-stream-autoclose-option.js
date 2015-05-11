@@ -23,7 +23,6 @@ var assert = require('assert');
 var path = require('path');
 var fs = require('fs');
 
-
 var file = path.join(common.tmpDir, 'write-autoclose-opt1.txt');
 var stream = fs.createWriteStream(file, {flags: 'w+', autoClose: false});
 stream.write('Test1');
@@ -35,7 +34,6 @@ stream.on('finish', function() {
     next();
   });
 });
-
 
 function next() {
   // This will tell us if the fd is usable again or not
