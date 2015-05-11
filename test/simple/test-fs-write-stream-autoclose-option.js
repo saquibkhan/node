@@ -25,7 +25,7 @@ var fs = require('fs');
 
 
 var file = path.join(common.tmpDir, 'write-autoclose-opt1.txt');
-var stream = fs.createWriteStream(file,{flags: 'w+',autoClose: false});
+var stream = fs.createWriteStream(file, {flags: 'w+', autoClose: false});
 stream.write('Test1');
 stream.end();
 stream.on('finish', function() {
@@ -39,7 +39,7 @@ stream.on('finish', function() {
 
 function next() {
   // This will tell us if the fd is usable again or not
-  stream = fs.createWriteStream(null, {fd: stream.fd, start: 0 });
+  stream = fs.createWriteStream(null, {fd: stream.fd, start:0 });
   stream.write('Test2');
   stream.end();
   stream.on('finish', function() {
@@ -51,13 +51,9 @@ function next() {
 
 function next2() {
   //This will test if after reusing the fd data is written properly
-  var readStream = fs.createReadStream(file);
-  readStream.data='';
-  readStream.on('data', function(data) {
-    readStream.data += data;
-  });
-  readStream.on('end', function(err) {
-    assert.equal(readStream.data, 'Test2');
+  fs.readFile(file, function(err, data) {
+    assert(!err);
+    assert.equal(data, 'Test2');
     process.nextTick(next3);
   });
 }
@@ -69,14 +65,8 @@ function next3() {
   stream.end();
   stream.on('finish', function() {
     process.nextTick(function() {
-      if(stream.hasOwnProperty('closed'))
-        assert(stream.closed);
+      assert(stream.closed);
       assert(!stream.fd);
     });
   });
 }
-
-process.on('exit', function() {
-  assert(stream.closed);
-  assert(!stream.fd);
-});
