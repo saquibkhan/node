@@ -60,7 +60,7 @@ function next2() {
 
 function next3() {
   //This is to test success scenario where autoClose is true
-  var stream = fs.createWriteStream(file,{autoClose:true});
+  var stream = fs.createWriteStream(file, {autoClose: true});
   stream.write('Test3');
   stream.end();
   stream.on('finish', function() {
